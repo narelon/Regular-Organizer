@@ -65,10 +65,33 @@ class Calendar:
     def remove_reminder(self, reminder):
         self.reminders.remove(reminder)
     
-    
+    def mark_reminder_as_done(self):
+        print("Marking a reminder as done:")
+        title = input("Enter the title of the reminder to mark as done: ")
+        for reminder in self.reminders:
+            if reminder.title == title:
+                reminder.mark_as_done()
+                self.completed_tasks.append({
+                    "title": reminder.title,
+                    "date": datetime.date.today().strftime("%Y-%m-%d")
+                })
+                print("Reminder marked as done.")
+                return
+        print("Reminder not found.")
 
-    def mark_task_completed(self, reminder):
-        self.completed_tasks.append(reminder)
+    def save_completion_data(self):
+        today = datetime.date.today().strftime("%Y-%m-%d")
+        completion_data = []
+        for reminder in self.reminders:
+            completion_data.append({
+                "title": reminder.title,
+                "date": today,
+                "trigger_count": reminder.trigger_count,
+                "done_count": reminder.done_count
+            })
+        with open(f"completion_data_{today}.json", "w") as file:
+            json.dump(completion_data, file, indent=4)
+        print("Completion data saved.")
 
     def serialize(self):
         reminders_data = [reminder.serialize() for reminder in self.reminders]
@@ -162,9 +185,11 @@ def main():
     selected_day = datetime.date(2023, 6, 7)
     display_day_breakdown(calendar, selected_day)
 
-    # Mark a task as completed
-    completed_task = calendar.reminders[0]
-    calendar.mark_task_completed(completed_task)
+    # Mark a reminder as done
+    calendar.mark_reminder_as_done()
+
+    # Save completion data
+    calendar.save_completion_data()
 
     # Serialize the calendar to JSON
     data = calendar.serialize()
