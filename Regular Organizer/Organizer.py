@@ -14,6 +14,7 @@ class Reminder:
         self.start_time = start_time
         self.end_time = end_time
         self.done = False
+        self.triggered = False
         self.trigger_count = 0
         self.done_count = 0
         self.repetitions = repetitions or []
@@ -22,8 +23,9 @@ class Reminder:
 
     def check_notification(self):
         current_time = datetime.datetime.now().time()
-        if self.start_time.time() <= current_time <= self.end_time.time():
+        if not self.triggered and self.start_time.time() <= current_time <= self.end_time.time():
             print(f"Reminder: {self.title} - It's time!")
+            self.triggered = True
             self.trigger_count += 1
             if self.done:
                 self.done_count += 1
@@ -65,19 +67,27 @@ class Calendar:
     def remove_reminder(self, reminder):
         self.reminders.remove(reminder)
     
-    def mark_reminder_as_done(self):
-        print("Marking a reminder as done:")
-        title = input("Enter the title of the reminder to mark as done: ")
-        for reminder in self.reminders:
-            if reminder.title == title:
-                reminder.mark_as_done()
-                self.completed_tasks.append({
-                    "title": reminder.title,
-                    "date": datetime.date.today().strftime("%Y-%m-%d")
-                })
-                print("Reminder marked as done.")
-                return
-        print("Reminder not found.")
+    def mark_reminder_as_done(self, reminder):
+        #print("Marking a reminder as done:")
+        #title = input("Enter the title of the reminder to mark as done: ")
+        #for reminder in self.reminders:
+        #    if reminder.title == title:
+        #        reminder.mark_as_done()
+        #        self.completed_tasks.append({
+        #            "title": reminder.title,
+        #            "date": datetime.date.today().strftime("%Y-%m-%d")
+        #        })
+        #        print("Reminder marked as done.")
+        #        return
+        #print("Reminder not found.")
+        #TODO: what the fuck was i thinking this is an awful method??
+        reminder.mark_as_done()
+        self.completed_tasks.append({
+            "title": reminder.title,
+            "date": datetime.date.today().strftime("%Y-%m-%d")
+        })
+        print("Reminder marked as done.")
+        return
 
     def save_completion_data(self):
         today = datetime.date.today().strftime("%Y-%m-%d")
@@ -89,6 +99,7 @@ class Calendar:
                 "trigger_count": reminder.trigger_count,
                 "done_count": reminder.done_count
             })
+            reminder.triggered = False
         with open(f"completion_data_{today}.json", "w") as file:
             json.dump(completion_data, file, indent=4)
         print("Completion data saved.")
