@@ -13,6 +13,9 @@ class Reminder:
         self.title = title
         self.start_time = start_time
         self.end_time = end_time
+        self.done = False
+        self.trigger_count = 0
+        self.done_count = 0
         self.repetitions = repetitions or []
         self.bank_holiday_adjustment = bank_holiday_adjustment
         self.permanent_offset = permanent_offset
@@ -21,6 +24,12 @@ class Reminder:
         current_time = datetime.datetime.now().time()
         if self.start_time.time() <= current_time <= self.end_time.time():
             print(f"Reminder: {self.title} - It's time!")
+            self.trigger_count += 1
+            if self.done:
+                self.done_count += 1
+
+    def mark_as_done(self):
+        self.done = True
 
     def serialize(self):
         return {
@@ -55,6 +64,8 @@ class Calendar:
 
     def remove_reminder(self, reminder):
         self.reminders.remove(reminder)
+    
+    
 
     def mark_task_completed(self, reminder):
         self.completed_tasks.append(reminder)
@@ -82,6 +93,19 @@ class Calendar:
                 if reminder.start_time.time() <= current_time <= reminder.end_time.time():
                     reminder.check_notification()
             time.sleep(60)  # Check every minute
+
+    # Add a reminder via a user input. TODO: Extend to button when GUI prepared.
+    def add_reminder(self):
+        print("Adding a new reminder:")
+        title = input("Enter the title: ")
+        start_time_str = input("Enter the start time (HH:MM): ")
+        start_time = datetime.datetime.strptime(start_time_str, "%H:%M").time()
+        end_time_str = input("Enter the end time (HH:MM): ")
+        end_time = datetime.datetime.strptime(end_time_str, "%H:%M").time()
+
+        reminder = Reminder(title, start_time, end_time)
+        self.reminders.append(reminder)
+        print("Reminder added successfully!")
 
 
 # Helper function to display a weekly calendar view. TODO: Set static to Mon:Sun vs 1 week from view date?
