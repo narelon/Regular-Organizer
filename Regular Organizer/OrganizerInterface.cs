@@ -1,8 +1,8 @@
 namespace Regular_Organizer
 {
-    public partial class Form1 : Form
+    public partial class OrganizerInterface : Form
     {
-        public Form1()
+        public OrganizerInterface()
         {
             InitializeComponent();
         }

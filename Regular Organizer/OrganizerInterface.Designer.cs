@@ -1,6 +1,6 @@
 ﻿namespace Regular_Organizer
 {
-    partial class Form1
+    partial class OrganizerInterface
     {
         /// <summary>
         ///  Required designer variable.
