@@ -1,5 +1,6 @@
 import datetime
 import json
+import time
 
 class ReminderEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -15,6 +16,11 @@ class Reminder:
         self.repetitions = repetitions or []
         self.bank_holiday_adjustment = bank_holiday_adjustment
         self.permanent_offset = permanent_offset
+
+    def check_notification(self):
+        current_time = datetime.datetime.now().time()
+        if self.start_time.time() <= current_time <= self.end_time.time():
+            print(f"Reminder: {self.title} - It's time!")
 
     def serialize(self):
         return {
@@ -57,14 +63,26 @@ class Calendar:
         reminders_data = [reminder.serialize() for reminder in self.reminders]
         return {'reminders': reminders_data, 'completed_tasks': self.completed_tasks}
 
+    def save_reminders_to_file(self, filename):
+        data = self.serialize()
+        with open(filename, 'w') as file:
+            json.dump(data, file, indent=4)
+
     @classmethod
-    def deserialize(cls, data):
-        calendar = cls()
-        for reminder_data in data['reminders']:
-            reminder = Reminder.deserialize(reminder_data)
-            calendar.add_reminder(reminder)
-        calendar.completed_tasks = data['completed_tasks']
+    def load_reminders_from_file(cls, filename):
+        with open(filename, 'r') as file:
+            data = json.load(file)
+        calendar = cls.deserialize(data)
         return calendar
+
+    def start_clock(self):
+        while True:
+            current_time = datetime.datetime.now().time()
+            for reminder in self.reminders:
+                if reminder.start_time.time() <= current_time <= reminder.end_time.time():
+                    reminder.check_notification()
+            time.sleep(60)  # Check every minute
+
 
 # Helper function to display a weekly calendar view. TODO: Set static to Mon:Sun vs 1 week from view date?
 def display_weekly_calendar(calendar):
@@ -97,6 +115,9 @@ def display_day_breakdown(calendar, day):
 def main():
     calendar = Calendar()
 
+    # Start the clock and check for reminders
+    calendar.start_clock()
+
     # For now, reminders go here. When you run it, it will display these reminders. Intent is to have these feed into graphic display of calendar; more here for data format.
     reminder1 = Reminder('Meeting', datetime.datetime(2023, 6, 7, 14, 0), datetime.datetime(2023, 6, 7, 15, 0))
     reminder2 = Reminder('Exercise', datetime.datetime(2023, 6, 8, 8, 0), datetime.datetime(2023, 6, 8, 9, 0), repetitions=['Monday', 'Wednesday', 'Friday'])
@@ -106,7 +127,12 @@ def main():
     calendar.add_reminder(reminder2)
     calendar.add_reminder(reminder3)
 
-    display_weekly_calendar(calendar)
+    # Save reminders to a file
+    calendar.save_reminders_to_file('reminders.json')
+
+    # Load reminders from a file
+    loaded_calendar = Calendar.load_reminders_from_file('reminders.json')
+    display_weekly_calendar(loaded_calendar)
 
     # Display breakdown of a specific day
     selected_day = datetime.date(2023, 6, 7)
