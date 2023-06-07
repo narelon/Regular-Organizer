@@ -68,19 +68,6 @@ class Calendar:
         self.reminders.remove(reminder)
     
     def mark_reminder_as_done(self, reminder):
-        #print("Marking a reminder as done:")
-        #title = input("Enter the title of the reminder to mark as done: ")
-        #for reminder in self.reminders:
-        #    if reminder.title == title:
-        #        reminder.mark_as_done()
-        #        self.completed_tasks.append({
-        #            "title": reminder.title,
-        #            "date": datetime.date.today().strftime("%Y-%m-%d")
-        #        })
-        #        print("Reminder marked as done.")
-        #        return
-        #print("Reminder not found.")
-        #TODO: what the fuck was i thinking this is an awful method??
         reminder.mark_as_done()
         self.completed_tasks.append({
             "title": reminder.title,
